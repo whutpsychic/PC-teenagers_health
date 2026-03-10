@@ -15,6 +15,9 @@ const electronAPI = {
   // 删除数据
   deleteData: (id) => ipcRenderer.invoke('delete-data', id),
   
+  // 批量删除数据
+  batchDeleteData: (ids) => ipcRenderer.invoke('batch-delete-data', ids),
+  
   // 监听数据变更事件（可选）
   onDataChanged: (callback) => {
     ipcRenderer.on('data-changed', (_, data) => callback(data));

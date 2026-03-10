@@ -6,7 +6,7 @@ const fs = require("fs").promises;
 // 开发模式
 const developing = true;
 
-app.name = 'Teens_health'; // ← 应用名
+app.name = "Teens_health"; // ← 应用名
 
 // 数据存储文件路径
 const DATA_FILE = path.join(app.getPath("userData"), "data.json");
@@ -109,6 +109,22 @@ ipcMain.handle("update-data", async (event, id, updatedData) => {
 ipcMain.handle("delete-data", async (event, id) => {
   const currentData = await readAllData();
   const filteredData = currentData.filter((item) => item.id != id);
+
+  if (filteredData.length < currentData.length) {
+    await writeAllData(filteredData);
+    return { success: true, message: "Data deleted successfully" };
+  } else {
+    return { success: false, message: "Item not found" };
+  }
+});
+
+ipcMain.handle("batch-delete-data", async (event, ids) => {
+  const currentData = await readAllData();
+  let filteredData = currentData;
+
+  ids.forEach((id) => {
+    filteredData = filteredData.filter((item) => item.id != id);
+  });
 
   if (filteredData.length < currentData.length) {
     await writeAllData(filteredData);

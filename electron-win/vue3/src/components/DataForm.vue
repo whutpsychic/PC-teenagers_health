@@ -42,6 +42,7 @@
 import { reactive, ref } from 'vue'
 import { Histogram, Operation } from '@element-plus/icons-vue'
 import type { FormRules } from 'element-plus'
+import { debugging } from '@/appConfig'
 
 const emits = defineEmits(['save'])
 
@@ -51,13 +52,13 @@ const formRef = ref()
 
 const formData = reactive<Databar>({
   id: null,
-  name: null,
-  sex: null,
-  time: null,
-  age: null,
-  number: null,
-  height: null,
-  weight: null,
+  name: debugging ? '测试姓名' : null,
+  sex: debugging ? '男' : null,
+  time: debugging ? Date.now() : null,
+  age: debugging ? 'n岁' : null,
+  number: debugging ? '1234567' : null,
+  height: debugging ? 178 : null,
+  weight: debugging ? 100 : null,
   bmi: null
 })
 
@@ -96,6 +97,24 @@ const onSave = () => {
     }
   })
 }
+
+// 清除数据
+const clear = () => {
+  formRef.value.resetFields()
+  formData.id = null
+}
+
+// 加载预设数据
+const setupData = (data: any) => {
+  const keys = Object.keys(formData) as (keyof Databar)[];
+  for (const key of keys) {
+    formData[key] = data[key]; // ✅ TS 现在能正确推断每个 key 的类型！
+  }
+}
+
+defineExpose({
+  clear, setupData
+})
 
 </script>
 

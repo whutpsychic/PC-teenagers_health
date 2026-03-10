@@ -1,17 +1,12 @@
 <template>
   <Block>
-    <!-- <p>{{ result }}</p>
-    <el-button @click="loadData">查询所有数据</el-button>
-    <el-button @click="onAdd">添加数据</el-button>
-    <el-button @click="onEdit">修改数据</el-button>
-    <el-button @click="onDelete">删除数据</el-button> -->
     <div class="top-searcher">
       <el-form inline label-position="right" label-width="80px" :model="searchForm">
         <el-form-item class="fi" label="姓名：">
-          <el-input v-model="searchForm.name" placeholder="请输入姓名以搜索"></el-input>
+          <el-input v-model="searchForm.name" placeholder="请输入姓名以搜索" clearable></el-input>
         </el-form-item>
         <el-form-item class="fi" label="登记号：">
-          <el-input v-model="searchForm.number" placeholder="请输入登记号以搜索"></el-input>
+          <el-input v-model="searchForm.number" placeholder="请输入登记号以搜索" clearable></el-input>
         </el-form-item>
         <el-form-item class="fi">
           <el-button type="primary" :icon="Search" @click="onSearch">搜索</el-button>
@@ -20,26 +15,54 @@
           <el-button type="success" :icon="Plus" @click="onAdd">新增</el-button>
         </el-form-item>
         <el-form-item class="fi">
-          <el-button type="danger" :icon="Delete" @click="onBatchDelete">批量删除</el-button>
+          <el-button type="danger" :icon="Delete" @click="onBatchDelete"
+            :disabled="selectedRows.length <= 0">批量删除</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="table-can">
-      <el-table :data="tableData" stripe style="width: 100%">
+      <el-table :data="tableData" stripe style="width: 100%" @selection-change="onChangeTableSelection">
+        <el-table-column type="selection" align="center" width="55" />
         <el-table-column prop="name" label="姓名" align="center" width="180" />
         <el-table-column prop="sex" label="性别" align="center" width="100" />
-        <el-table-column prop="time" label="检查时间" align="center" />
         <el-table-column prop="age" label="年龄" align="center" />
         <el-table-column prop="number" label="登记号" align="center" />
-        <el-table-column prop="height" label="身高" align="center" />
-        <el-table-column prop="weight" label="体重" align="center" />
+        <el-table-column prop="height" label="身高" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.height }}cm</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="weight" label="体重" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.weight }}kg</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="bmi" label="BMI" align="center" />
+        <el-table-column prop="time" label="检查时间" align="center" width="220">
+          <template #default="scope">
+            <span>{{ dayjs(scope.row.time).format('YYYY-MM-DD') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column fixed="right" label="操作" align="center" min-width="100">
+          <template #default="scope">
+            <el-button link type="primary" size="small" @click="() => onEdit(scope.row)">
+              编辑
+            </el-button>
+            <el-popconfirm width="220" :icon="WarningFilled" icon-color="orange"
+              :title="`确定要删除 ${scope.row.name} 的数据吗？`" confirm-button-text="确定" cancel-button-text="取消"
+              @confirm="() => onDelete(scope.row.id)">
+              <template #reference>
+                <el-button link type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
     <div class="pagin-can">
       <el-pagination v-model:current-page="pagin.current" v-model:page-size="pagin.pageSize" :page-sizes="pagin.sizes"
-        :size="pagin.size" layout="total, sizes, prev, pager, next, jumper" :total="pagin.total"
-        @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+        layout="total, sizes, prev, pager, next, jumper" :total="pagin.total" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" />
     </div>
   </Block>
   <el-drawer v-model="viewDrawer" title="检查数据录入">
@@ -48,12 +71,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
-import { Search, Plus, Delete } from '@element-plus/icons-vue'
+import { Search, Plus, Delete, WarningFilled } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import dayjs from 'dayjs'
 
-const result = ref()
 const formMode = ref('add') // add | edit
 const dataForm = ref()
 const viewDrawer = ref<boolean>(false)
@@ -65,126 +89,177 @@ const searchForm = reactive({
 })
 
 const allData = ref<Databar[]>([]) // 所有数据
-const tableData = ref<Databar[]>([]) // 表格数据（展示用）
+const tableData = ref<Databar[]>([]) // 表格数据(查看用)
+const selectedRows = ref<Databar[]>([]) // 表格选择项
 
 // 分页相关
 const pagin = reactive({
   current: 1,
   pageSize: 10,
   sizes: [10, 20, 50, 100],
-  size: 10,
   total: 0
 })
 
-const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
+// 根据搜索条件、分页信息计算表格渲染数据
+const calcTableData = async () => {
+  await loadAllData()
+  const { name, number } = searchForm
+  const { current, pageSize } = pagin
+  const arr = allData.value.filter((item: any) => {
+    return (item.name!.includes(name)) && (item.number!.includes(number))
+  })
+  const result = arr.slice((current - 1) * pageSize, current * pageSize);
+
+  tableData.value = result
+  pagin.total = arr.length
 }
+
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
+  pagin.current = val
+  calcTableData()
+}
+
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+  pagin.pageSize = val
+  calcTableData()
+}
+
+const onChangeTableSelection = (rows: Databar[]) => {
+  selectedRows.value = rows
 }
 
 // 查询所有数据
-const loadData = async () => {
+const loadAllData = async () => {
   const { electronAPI } = window as any
   if (electronAPI) {
     try {
       const data = await electronAPI.loadAllData();
-      result.value = JSON.stringify(data, null, 2);
+      console.log(data)
+      allData.value = data
     } catch (error) {
-      result.value = `Error: ${error}`;
+      console.error(error)
     }
   } else {
-    result.value = 'Electron API not available';
+    console.log('Electron API not available')
   }
 }
 
 // 搜索
 const onSearch = () => {
-
+  calcTableData()
 }
 
 // 新增
 const onAdd = async () => {
   formMode.value = 'add'
   viewDrawer.value = true
+  setTimeout(() => {
+    dataForm.value.clear()
+  }, 0)
 }
 
 // 编辑
 const onEdit = async (data: any) => {
   formMode.value = 'edit'
   console.log(data)
-  // viewDrawer.value = true
-
+  viewDrawer.value = true
+  setTimeout(() => {
+    dataForm.value.setupData(data)
+  }, 0)
 }
 
 const onSaveDataLine = async (data: Databar) => {
-  console.log(data)
   const { electronAPI } = window as any
   if (electronAPI) {
     // 新增
     if (formMode.value === 'add') {
       try {
-        const data = await electronAPI.saveData({ name: 'aaaaaaaaa', value: 89000 });
-        result.value = JSON.stringify(data, null, 2);
-        loadData()
+        await electronAPI.saveData({ ...data });
+        viewDrawer.value = false
+        ElMessage({
+          message: '新增数据成功',
+          type: 'success',
+        })
+        calcTableData()
       } catch (error) {
-        result.value = `Error: ${error}`;
+        console.error(error)
       }
     }
     // 编辑
     else if (formMode.value === 'edit') {
       try {
-        const data = await electronAPI.updateData(1, { name: 'aaaaaaaaa', value: 89000 });
-        result.value = JSON.stringify(data, null, 2);
-        loadData()
+        await electronAPI.updateData(data.id, { ...data });
+        viewDrawer.value = false
+        ElMessage({
+          message: '修改数据成功',
+          type: 'success',
+        })
+        calcTableData()
       } catch (error) {
-        result.value = `Error: ${error}`;
+        console.error(error)
       }
     }
   } else {
-    result.value = 'Electron API not available';
+    console.log('Electron API not available')
   }
 }
 
 // 删除(单条)
-const onDelete = async () => {
+const onDelete = async (id: any) => {
   const { electronAPI } = window as any
-
   if (electronAPI) {
     try {
-      const data = await electronAPI.deleteData(1);
-      result.value = JSON.stringify(data, null, 2);
-      loadData()
+      await electronAPI.deleteData(id);
+      ElMessage({
+        message: '数据删除成功',
+        type: 'success',
+      })
+      calcTableData()
     } catch (error) {
-      result.value = `Error: ${error}`;
+      console.error(error)
     }
   } else {
-    result.value = 'Electron API not available';
+    console.log('Electron API not available')
   }
 }
 
 // 删除(批量)
 const onBatchDelete = async () => {
-  const { electronAPI } = window as any
-
-  if (electronAPI) {
-    try {
-      const data = await electronAPI.deleteData(1);
-      result.value = JSON.stringify(data, null, 2);
-      loadData()
-    } catch (error) {
-      result.value = `Error: ${error}`;
+  ElMessageBox.confirm(
+    '确定要删除选中的所有数据吗？',
+    '操作确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
     }
-  } else {
-    result.value = 'Electron API not available';
-  }
+  )
+    // 确认操作
+    .then(() => {
+      const { electronAPI } = window as any
+      if (electronAPI) {
+        try {
+          const ids = selectedRows.value.map((row) => row.id)
+          electronAPI.batchDeleteData(ids)
+        } catch (error) {
+          console.error(error)
+        }
+      } else {
+        console.log('Electron API not available')
+      }
+    }).then(() => {
+      ElMessage({
+        message: '数据删除成功',
+        type: 'success',
+      })
+      calcTableData()
+    })
 }
 
-onMounted(() => {
-  loadData()
-  setTimeout(() => {
-    console.log(result.value)
-  }, 1000)
+onMounted(async () => {
+  calcTableData()
 })
 
 </script>
@@ -203,7 +278,7 @@ onMounted(() => {
 }
 
 .table-can {
-  min-height: 600px;
+  min-height: 500px;
   margin-top: 30px;
   margin-bottom: 30px;
 }
