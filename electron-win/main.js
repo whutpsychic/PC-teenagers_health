@@ -1,110 +1,119 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
-const fs = require('fs');
+// main.js
+const { app, BrowserWindow, ipcMain } = require("electron");
+const path = require("path");
+const fs = require("fs").promises;
 
-// 数据文件路径
-const dataFilePath = path.join(app.getPath('userData'), 'data.json');
+// 开发模式
+const developing = true;
+
+app.name = 'Teens_health'; // ← 应用名
+
+// 数据存储文件路径
+const DATA_FILE = path.join(app.getPath("userData"), "data.json");
 
 // 初始化数据文件
-function initializeDataFile() {
-    if (!fs.existsSync(dataFilePath)) {
-        fs.writeFileSync(dataFilePath, JSON.stringify([]));
-    }
+async function initializeDataFile() {
+  try {
+    await fs.access(DATA_FILE);
+  } catch {
+    // 如果文件不存在，创建一个空数组
+    await fs.writeFile(DATA_FILE, JSON.stringify([]));
+  }
 }
 
-// 读取数据
-function readData() {
-    try {
-        const data = fs.readFileSync(dataFilePath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('读取数据失败:', error);
-        return [];
-    }
+// 读取所有数据
+async function readAllData() {
+  try {
+    const data = await fs.readFile(DATA_FILE, "utf8");
+    return JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading data:", error);
+    return [];
+  }
 }
 
-// 写入数据
-function writeData(data) {
-    try {
-        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-        return true;
-    } catch (error) {
-        console.error('写入数据失败:', error);
-        return false;
-    }
+// 写入所有数据
+async function writeAllData(data) {
+  try {
+    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error("Error writing data:", error);
+    throw error;
+  }
 }
-
-let mainWindow;
 
 function createWindow() {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        }
-    });
+  const mainWindow = new BrowserWindow({
+    width: 1680,
+    height: 900,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
 
-    // 创建HTML内容
-    mainWindow.loadFile('dist/index.html');
+  if (developing) {
+    console.log("env: development");
+    // 加载应用内容
+    mainWindow.loadURL("http://localhost:5173"); // 如果使用 Vite 开发服务器
+    mainWindow.webContents.openDevTools();
+    return;
+  } else {
+    console.log("env: production");
+    // 加载应用内容
+    mainWindow.loadFile("vue3/dist/index.html");
+  }
 }
 
-app.whenReady().then(() => {
-    initializeDataFile();
-    createWindow();
+app.whenReady().then(async () => {
+  await initializeDataFile();
+  createWindow();
 
-    // 添加数据
-    ipcMain.handle('add-data', async (event, item) => {
-        try {
-            const data = readData();
-            data.push(item);
-            const success = writeData(data);
-            return { success, message: success ? '' : '写入文件失败' };
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    });
-
-    // 获取所有数据
-    ipcMain.handle('get-all-data', async (event) => {
-        return readData();
-    });
-
-    // 删除数据
-    ipcMain.handle('delete-data', async (event, id) => {
-        try {
-            const data = readData();
-            const filteredData = data.filter(item => item.id !== id);
-            if (filteredData.length === data.length) {
-                return { success: false, message: '未找到指定ID的数据' };
-            }
-            const success = writeData(filteredData);
-            return { success, message: success ? '' : '写入文件失败' };
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    });
-
-    // 搜索数据
-    ipcMain.handle('search-data', async (event, keyword) => {
-        try {
-            const data = readData();
-            const filteredData = data.filter(item => 
-                item.name.toLowerCase().includes(keyword.toLowerCase()) ||
-                item.email.toLowerCase().includes(keyword.toLowerCase()) ||
-                (item.description && item.description.toLowerCase().includes(keyword.toLowerCase()))
-            );
-            return filteredData;
-        } catch (error) {
-            console.error('搜索数据失败:', error);
-            return [];
-        }
-    });
+  app.on("activate", function () {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+app.on("window-all-closed", function () {
+  if (process.platform !== "darwin") app.quit();
+});
+
+// IPC处理程序
+ipcMain.handle("load-all-data", async () => {
+  return await readAllData();
+});
+
+ipcMain.handle("save-data", async (event, data) => {
+  const currentData = await readAllData();
+  const newData = Array.isArray(data)
+    ? [...currentData, ...data]
+    : [...currentData, data];
+  await writeAllData(newData);
+  return { success: true, message: "Data stored successfully" };
+});
+
+ipcMain.handle("update-data", async (event, id, updatedData) => {
+  const currentData = await readAllData();
+  const index = currentData.findIndex((item) => item.id == id);
+
+  if (index !== -1) {
+    currentData[index] = { ...currentData[index], ...updatedData };
+    await writeAllData(currentData);
+    return { success: true, message: "Data updated successfully" };
+  } else {
+    return { success: false, message: "Item not found" };
+  }
+});
+
+ipcMain.handle("delete-data", async (event, id) => {
+  const currentData = await readAllData();
+  const filteredData = currentData.filter((item) => item.id != id);
+
+  if (filteredData.length < currentData.length) {
+    await writeAllData(filteredData);
+    return { success: true, message: "Data deleted successfully" };
+  } else {
+    return { success: false, message: "Item not found" };
+  }
 });

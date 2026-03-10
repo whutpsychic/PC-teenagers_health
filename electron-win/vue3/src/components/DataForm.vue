@@ -1,18 +1,19 @@
 <!-- 这是录入数据的表单 -->
 <template>
   <div class="form-can">
-    <el-form label-position="right" label-width="80px" :model="formData" style="max-width: 600px">
+    <el-form ref="formRef" label-position="right" label-width="120px" :model="formData" :rules="formRules"
+      style="max-width: 600px">
       <el-form-item label="姓名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入姓名" :style="`width:${itemWidth}px;`" />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
         <el-select v-model="formData.sex" placeholder="请选择姓名" :style="`width:${itemWidth}px;`">
-          <el-option label="男" value="male"></el-option>
-          <el-option label="女" value="female"></el-option>
+          <el-option label="男" value="男"></el-option>
+          <el-option label="女" value="女"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="检查时间" prop="checkoutTime">
-        <el-date-picker v-model="formData.checkoutTime" placeholder="请选择时间" :style="`width:${itemWidth}px;`" />
+      <el-form-item label="检查时间" prop="time">
+        <el-date-picker v-model="formData.time" placeholder="请选择时间" :style="`width:${itemWidth}px;`" value-format="x" />
       </el-form-item>
       <el-form-item label="年龄" prop="age">
         <el-input v-model="formData.age" placeholder="请输入年龄，例如：2.5岁 或 30个月" :style="`width:${itemWidth}px;`" />
@@ -32,7 +33,7 @@
     </el-form>
     <div class="btns">
       <el-button type="primary" :icon="Histogram" @click="onCalculate" disabled>计算BMI</el-button>
-      <el-button type="success" :icon="Operation" @click="onSave" disabled>保存数据</el-button>
+      <el-button type="success" :icon="Operation" @click="onSave">保存数据</el-button>
     </div>
   </div>
 </template>
@@ -40,13 +41,19 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { Histogram, Operation } from '@element-plus/icons-vue'
+import type { FormRules } from 'element-plus'
+
+const emits = defineEmits(['save'])
 
 const itemWidth = 280
 
-const formData = reactive({
-  name: '',
-  sex: '',
-  checkoutTime: null,
+const formRef = ref()
+
+const formData = reactive<Databar>({
+  id: null,
+  name: null,
+  sex: null,
+  time: null,
   age: null,
   number: null,
   height: null,
@@ -54,13 +61,41 @@ const formData = reactive({
   bmi: null
 })
 
-const formRules = [
+const validateSevenDigitNumber = (rule: any, value: any, callback: any) => {
+  if (value === '') {
+    callback(new Error('请输入一个七位数字'))
+  } else if (!/^\d{7}$/.test(value)) {
+    callback(new Error('你输入的不是一个七位数字'))
+  } else {
+    callback()
+  }
+}
 
-]
+const formRules = reactive<FormRules>({
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  time: [{ required: true, message: '请选择日期', trigger: ['blur', 'change'] }],
+  age: [{ required: true, message: '请输入年龄', trigger: 'blur' }],
+  number: [{ required: true, validator: validateSevenDigitNumber, trigger: 'blur' }],
+  height: [{ required: true, message: '请输入身高', trigger: ['blur', 'change'] }],
+  weight: [{ required: true, message: '请输入体重', trigger: ['blur', 'change'] }],
+})
 
 const onCalculate = () => { }
 
-const onSave = () => { }
+const onSave = () => {
+  formRef.value.validate().then((res: any) => {
+    // 通过校验
+    if (res === true) {
+      // 如果没有id
+      if (!formData.id) {
+        formData.id = Date.now()
+      }
+      // 开始准备保存数据
+      emits('save', formData)
+    }
+  })
+}
 
 </script>
 

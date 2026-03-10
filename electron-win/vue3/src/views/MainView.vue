@@ -33,7 +33,7 @@
     <div class="chart-can"></div>
   </Block>
   <el-drawer v-model="viewDrawer" title="检查数据录入">
-    <DataForm />
+    <DataForm @save="onSaveDataLine" />
   </el-drawer>
 </template>
 
@@ -44,12 +44,16 @@ import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
 import Echarts from '@/components/Echart.vue'
 
+// const { ipcRenderer } = require("electron");
+
 // 显示编辑抽屉
 const viewDrawer = ref<boolean>(false)
 
+// 顶部搜索条件
 const sex = ref(null)
 const age = ref(null)
 
+// 图表1的option
 const chartOption = ref({
   xAxis: {
     type: 'category',
@@ -64,10 +68,24 @@ const chartOption = ref({
       type: 'line'
     }
   ]
-}) // 图表1
+})
 
+
+// 准备录入数据
 const onInputData = () => {
   viewDrawer.value = true
+}
+
+// 准备保存数据
+const onSaveDataLine = (dataline: any) => {
+  console.log(" ------ onSaveDataLine ------ ")
+  // ipcRenderer.invoke("add-data", dataline).then((result: any) => {
+  //   if (result.success) {
+  //     alert("数据添加成功！");
+  //   } else {
+  //     alert("添加失败：" + result.message);
+  //   }
+  // });
 }
 
 </script>

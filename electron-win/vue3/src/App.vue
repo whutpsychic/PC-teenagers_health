@@ -27,6 +27,11 @@ const handleClickTab = (tabName: string) => {
   activeTabName.value = tabName
 }
 
+setTimeout(() => {
+  activeTabName.value = 'tab2'
+}, 0)
+
+
 </script>
 
 <style scoped></style>

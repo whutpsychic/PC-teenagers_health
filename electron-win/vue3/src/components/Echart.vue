@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, unref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import * as echarts from 'echarts';
 
 const props = defineProps({
@@ -18,13 +18,12 @@ onMounted(() => {
   chartInstance.value = echarts.init(cc.value)
   chartInstance.value.setOption(props.option)
 
-  window.addEventListener('resize', () => {
-    chartInstance.value?.resize()
-  })
+  // window.addEventListener('resize', () => {
+  //   chartInstance.value?.resize()
+  // })
 })
 
 watch(props.option, (newv, oldv) => {
-  console.log(newv)
   chartInstance.value.setOption(newv)
 })
 
