@@ -28,11 +28,14 @@
         <el-input-number v-model="formData.weight" placeholder="请输入体重" :style="`width:${itemWidth}px;`" />
       </el-form-item>
       <el-form-item label="BMI" prop="bmi">
-        <el-input v-model="formData.bmi" disabled :style="`width:${itemWidth}px;`" />
+        <span v-if="formData.bmi">{{ formData.bmi }}</span>
+        <span v-else style="color: #aaa">{{ '请填好身高体重后再计算' }}</span>
       </el-form-item>
+      <p class="details">BMI计算公式：体重 (kg) 除以身高 (m) 的平方</p>
     </el-form>
     <div class="btns">
-      <el-button type="primary" :icon="Histogram" @click="onCalculate" disabled>计算BMI</el-button>
+      <el-button type="primary" :icon="Histogram" @click="onCalculate"
+        :disabled="!formData.height || !formData.weight">计算BMI</el-button>
       <el-button type="success" :icon="Operation" @click="onSave">保存数据</el-button>
     </div>
   </div>
@@ -82,7 +85,14 @@ const formRules = reactive<FormRules>({
   weight: [{ required: true, message: '请输入体重', trigger: ['blur', 'change'] }],
 })
 
-const onCalculate = () => { }
+const onCalculate = () => {
+  const { weight, height } = formData
+
+  if (weight && height) {
+    const result = (weight / height * 100) / (height / 100)
+    formData.bmi = result
+  }
+}
 
 const onSave = () => {
   formRef.value.validate().then((res: any) => {
@@ -128,5 +138,11 @@ defineExpose({
 
 .btns button {
   margin: 0 15px;
+}
+
+.details {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
 }
 </style>

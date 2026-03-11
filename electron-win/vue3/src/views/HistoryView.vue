@@ -19,6 +19,7 @@
             :disabled="selectedRows.length <= 0">批量删除</el-button>
         </el-form-item>
       </el-form>
+      <el-button :icon="InfoFilled" round @click="viewBmiInfo = true"></el-button>
     </div>
     <div class="table-can">
       <el-table :data="tableData" stripe style="width: 100%" @selection-change="onChangeTableSelection">
@@ -37,7 +38,22 @@
             <span>{{ scope.row.weight }}kg</span>
           </template>
         </el-table-column>
-        <el-table-column prop="bmi" label="BMI" align="center" />
+        <el-table-column prop="bmi" label="BMI" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.bmi && (scope.row.bmi < 18.5)" style="font-weight:bold;color: #87CEFA;">
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+            </span>
+            <span v-else-if="scope.row.bmi && (scope.row.bmi <= 23.9)" style="font-weight:bold;color: green;">
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+            </span>
+            <span v-else-if="scope.row.bmi && (scope.row.bmi <= 27.9)" style="font-weight:bold;color: orange;">
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+            </span>
+            <span v-else style="font-weight:bold;color: red;">
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+            </span>
+          </template>
+        </el-table-column>
         <el-table-column prop="time" label="检查时间" align="center" width="220">
           <template #default="scope">
             <span>{{ dayjs(scope.row.time).format('YYYY-MM-DD') }}</span>
@@ -68,19 +84,26 @@
   <el-drawer v-model="viewDrawer" title="检查数据录入">
     <DataForm ref="dataForm" @save="onSaveDataLine" />
   </el-drawer>
+  <el-dialog v-model="viewBmiInfo" title="BMI指数参考信息">
+    <BMIboard />
+  </el-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
-import { Search, Plus, Delete, WarningFilled } from '@element-plus/icons-vue'
+import BMIboard from '@/components/BMIboard.vue'
+import { Search, Plus, Delete, WarningFilled, InfoFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+
+const dd = 3 // bmi显示精确到小数点后几位
 
 const formMode = ref('add') // add | edit
 const dataForm = ref()
 const viewDrawer = ref<boolean>(false)
+const viewBmiInfo = ref<boolean>(false)
 
 // 搜索条件
 const searchForm = reactive({
@@ -96,7 +119,7 @@ const selectedRows = ref<Databar[]>([]) // 表格选择项
 const pagin = reactive({
   current: 1,
   pageSize: 10,
-  sizes: [10, 20, 50, 100],
+  sizes: [5, 10, 20, 50],
   total: 0
 })
 
@@ -237,12 +260,12 @@ const onBatchDelete = async () => {
     }
   )
     // 确认操作
-    .then(() => {
+    .then(async () => {
       const { electronAPI } = window as any
       if (electronAPI) {
         try {
           const ids = selectedRows.value.map((row) => row.id)
-          electronAPI.batchDeleteData(ids)
+          await electronAPI.batchDeleteData(ids)
         } catch (error) {
           console.error(error)
         }
@@ -258,6 +281,10 @@ const onBatchDelete = async () => {
     })
 }
 
+const viewBMI = () => {
+
+}
+
 onMounted(async () => {
   calcTableData()
 })
@@ -267,7 +294,7 @@ onMounted(async () => {
 <style scoped>
 .top-searcher {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   margin: 10px 0;
 }
