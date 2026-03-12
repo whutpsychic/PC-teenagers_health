@@ -16,7 +16,11 @@
         <el-date-picker v-model="formData.time" placeholder="请选择时间" :style="`width:${itemWidth}px;`" value-format="x" />
       </el-form-item>
       <el-form-item label="年龄" prop="age">
-        <el-input v-model="formData.age" placeholder="请输入年龄，例如：2.5岁 或 30个月" :style="`width:${itemWidth}px;`" />
+        <!-- <el-input v-model="formData.age" placeholder="请输入年龄，例如：2.5岁 或 30个月" :style="`width:${itemWidth}px;`" /> -->
+        <el-select v-model="formData.age" placeholder="请选择年龄层" :style="`width:${itemWidth}px;`">
+          <el-option v-for="(item) in [...growthData.ages, ...growthData.ages2]" :key="item" :label="item"
+            :value="item"></el-option>
+        </el-select>
       </el-form-item>
       <el-form-item label="登记号" prop="number">
         <el-input v-model="formData.number" placeholder="请输入登记号(七位数字)" :style="`width:${itemWidth}px;`" />
@@ -45,7 +49,7 @@
 import { reactive, ref } from 'vue'
 import { Histogram, Operation } from '@element-plus/icons-vue'
 import type { FormRules } from 'element-plus'
-import { debugging } from '@/appConfig'
+import { growthData } from '@/static/data'
 
 const emits = defineEmits(['save'])
 
@@ -55,13 +59,13 @@ const formRef = ref()
 
 const formData = reactive<Databar>({
   id: null,
-  name: debugging ? '测试姓名' : null,
-  sex: debugging ? '男' : null,
-  time: debugging ? Date.now() : null,
-  age: debugging ? 'n岁' : null,
-  number: debugging ? '1234567' : null,
-  height: debugging ? 178 : null,
-  weight: debugging ? 100 : null,
+  name: null,
+  sex: null,
+  time: null,
+  age: null,
+  number: null,
+  height: null,
+  weight: null,
   bmi: null
 })
 
@@ -122,9 +126,7 @@ const setupData = (data: any) => {
   }
 }
 
-defineExpose({
-  clear, setupData
-})
+defineExpose({ clear, setupData })
 
 </script>
 

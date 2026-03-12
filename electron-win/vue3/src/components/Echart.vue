@@ -14,17 +14,16 @@ const cc = ref()
 const chartInstance = ref<any>(null)
 
 onMounted(() => {
-  console.log(props.option)
   chartInstance.value = echarts.init(cc.value)
   chartInstance.value.setOption(props.option)
-
   // window.addEventListener('resize', () => {
   //   chartInstance.value?.resize()
   // })
 })
 
-watch(props.option, (newv, oldv) => {
-  chartInstance.value.setOption(newv)
+watch(() => props.option, (newv, oldv) => {
+  // chartInstance.value.clear()
+  chartInstance.value.setOption(newv, true)
 })
 
 </script>

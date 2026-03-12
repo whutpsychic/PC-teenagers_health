@@ -18,6 +18,16 @@
           <el-button type="danger" :icon="Delete" @click="onBatchDelete"
             :disabled="selectedRows.length <= 0">批量删除</el-button>
         </el-form-item>
+        <el-form-item class="fi">
+          <el-button type="primary" :icon="View" @click="() => viewInChart(allData)"
+            :disabled="allData.length <= 0">所有数据代入曲线图</el-button>
+        </el-form-item>
+        <el-form-item class="fi" v-if="debugging">
+          <el-button @click="onTest">添加n条测试数据</el-button>
+        </el-form-item>
+        <el-form-item class="fi" v-if="debugging">
+          <el-button @click="onTest2">清空数据库</el-button>
+        </el-form-item>
       </el-form>
       <el-button :icon="InfoFilled" round @click="viewBmiInfo = true"></el-button>
     </div>
@@ -61,14 +71,13 @@
         </el-table-column>
         <el-table-column fixed="right" label="操作" align="center" min-width="100">
           <template #default="scope">
-            <el-button link type="primary" size="small" @click="() => onEdit(scope.row)">
-              编辑
-            </el-button>
+            <el-button type="text" :icon="View" title="代入曲线图" @click="() => viewInChart([scope.row])" />
+            <el-button type="text" :icon="Edit" title="编辑" @click="() => onEdit(scope.row)" />
             <el-popconfirm width="220" :icon="WarningFilled" icon-color="orange"
               :title="`确定要删除 ${scope.row.name} 的数据吗？`" confirm-button-text="确定" cancel-button-text="取消"
               @confirm="() => onDelete(scope.row.id)">
               <template #reference>
-                <el-button link type="danger" size="small">删除</el-button>
+                <el-button type="text" :icon="Delete" title="删除" style="color: red;" />
               </template>
             </el-popconfirm>
           </template>
@@ -94,9 +103,13 @@ import { ref, reactive, onMounted } from 'vue'
 import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
 import BMIboard from '@/components/BMIboard.vue'
-import { Search, Plus, Delete, WarningFilled, InfoFilled } from '@element-plus/icons-vue'
+import { Search, Plus, Delete, WarningFilled, InfoFilled, Edit, View } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import { growthData } from '@/static/data'
+import { debugging } from '@/appConfig'
+
+const emits = defineEmits(['viewInChart'])
 
 const dd = 3 // bmi显示精确到小数点后几位
 
@@ -138,13 +151,11 @@ const calcTableData = async () => {
 }
 
 const handleCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
   pagin.current = val
   calcTableData()
 }
 
 const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
   pagin.pageSize = val
   calcTableData()
 }
@@ -159,7 +170,6 @@ const loadAllData = async () => {
   if (electronAPI) {
     try {
       const data = await electronAPI.loadAllData();
-      console.log(data)
       allData.value = data
     } catch (error) {
       console.error(error)
@@ -186,7 +196,6 @@ const onAdd = async () => {
 // 编辑
 const onEdit = async (data: any) => {
   formMode.value = 'edit'
-  console.log(data)
   viewDrawer.value = true
   setTimeout(() => {
     dataForm.value.setupData(data)
@@ -281,12 +290,89 @@ const onBatchDelete = async () => {
     })
 }
 
-const viewBMI = () => {
-
+const viewInChart = (arr: any[]) => {
+  emits('viewInChart', arr)
 }
 
 onMounted(async () => {
   calcTableData()
+})
+
+const onTest = () => {
+  const { electronAPI } = window as any
+  // 添加20条测试数据 
+  const arr = []
+  const n = 24
+  const splitTime = 30
+
+  for (let i = 0; i < n; i++) {
+    const h = Math.floor(Math.random() * (180 - 130 + 1)) + 130
+    const w = Math.floor(Math.random() * (100 - 60 + 1)) + 60
+    arr.push({
+      time: (i + 1) * splitTime,
+      data: {
+        id: i,
+        name: `测试姓名${i + 1}`,
+        sex: i < 10 ? '男' : '女',
+        age: growthData.ages2[i],
+        time: Date.now(),
+        number: `123456${i >= 10 ? i - 10 : i}`,
+        height: h,
+        weight: w,
+        bmi: (w / h * 100) / (h / 100)
+      }
+    })
+  }
+
+  arr.forEach((item) => {
+    setTimeout(() => {
+      electronAPI.saveData({ ...item.data });
+    }, item.time)
+  })
+
+  setTimeout(() => {
+    calcTableData()
+  }, (n + 1) * splitTime)
+}
+
+const onTest2 = async () => {
+  ElMessageBox.confirm(
+    '清空数据？',
+    '操作确认',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    // 确认操作
+    .then(async () => {
+      const { electronAPI } = window as any
+      if (electronAPI) {
+        try {
+          const ids = allData.value.map((row) => row.id)
+          await electronAPI.batchDeleteData(ids)
+        } catch (error) {
+          console.error(error)
+        }
+      } else {
+        console.log('Electron API not available')
+      }
+    }).then(() => {
+      ElMessage({
+        message: '数据删除成功',
+        type: 'success',
+      })
+      calcTableData()
+    })
+}
+
+const refreshTable = () => {
+  calcTableData()
+}
+
+defineExpose({
+  refreshTable
 })
 
 </script>

@@ -4,12 +4,12 @@
   </header>
   <main class="main-body">
     <div class="inner-view">
-      <el-tabs v-model="activeTabName" class="demo-tabs" @tab-click="handleClickTab">
+      <el-tabs v-model="activeTabName" class="demo-tabs" @tab-change="handleChangeTab">
         <el-tab-pane label="主程序" name="tab1">
-          <MainView />
+          <MainView ref="view1" />
         </el-tab-pane>
         <el-tab-pane label="历史数据" name="tab2">
-          <HistoryView />
+          <HistoryView ref="view2" @view-in-chart="onView" />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -21,16 +21,24 @@ import { ref } from 'vue'
 import MainView from '@/views/MainView.vue'
 import HistoryView from '@/views/HistoryView.vue'
 
+const view1 = ref()
+const view2 = ref()
 const activeTabName = ref('tab1')
 
-const handleClickTab = (tabName: string) => {
+const handleChangeTab = (tabName: string) => {
   activeTabName.value = tabName
+  if (tabName === 'tab2') {
+    view2.value.refreshTable()
+  }
 }
 
-setTimeout(() => {
-  activeTabName.value = 'tab2'
-}, 0)
-
+const onView = (arr: any[]) => {
+  activeTabName.value = 'tab1'
+  view1.value.setupData(arr)
+}
+// setTimeout(() => {
+//   activeTabName.value = 'tab2'
+// }, 0)
 
 </script>
 

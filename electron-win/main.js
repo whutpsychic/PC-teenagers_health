@@ -1,12 +1,14 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 // main.js
 const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 
 // 开发模式
-const developing = true;
+const developing = false;
 
-app.name = "Teens_health"; // ← 应用名
+// app.name = "Teens_health"; // ← 应用名
 
 // 数据存储文件路径
 const DATA_FILE = path.join(app.getPath("userData"), "data.json");
@@ -54,15 +56,13 @@ function createWindow() {
   });
 
   if (developing) {
-    console.log("env: development");
     // 加载应用内容
     mainWindow.loadURL("http://localhost:5173"); // 如果使用 Vite 开发服务器
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     return;
   } else {
-    console.log("env: production");
     // 加载应用内容
-    mainWindow.loadFile("vue3/dist/index.html");
+    mainWindow.loadFile("dist/index.html");
   }
 }
 
