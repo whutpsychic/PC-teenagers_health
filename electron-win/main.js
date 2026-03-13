@@ -58,11 +58,11 @@ function createWindow() {
   if (developing) {
     // 加载应用内容
     mainWindow.loadURL("http://localhost:5173"); // 如果使用 Vite 开发服务器
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     return;
   } else {
     // 加载应用内容
-    mainWindow.loadFile("dist/index.html");
+    mainWindow.loadFile("vue3/dist/index.html");
   }
 }
 

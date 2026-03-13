@@ -142,7 +142,7 @@ const calcTableData = async () => {
   const { name, number } = searchForm
   const { current, pageSize } = pagin
   const arr = allData.value.filter((item: any) => {
-    return (item.name!.includes(name)) && (item.number!.includes(number))
+    return (item.name!.includes(name)) && (`${item.number!}`.includes(number))
   })
   const result = arr.slice((current - 1) * pageSize, current * pageSize);
 
