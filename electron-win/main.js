@@ -1,7 +1,7 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // main.js
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs").promises;
 
@@ -54,6 +54,60 @@ function createWindow() {
       contextIsolation: true,
     },
   });
+
+  // // ========== 新增：自定义菜单栏核心代码 ==========
+  // const menuTemplate = [
+  //   {
+  //     label: "操作", // 菜单主名称，可自定义（如“应用”“功能”）
+  //     submenu: [
+  //       {
+  //         label: "刷新",
+  //         accelerator: "F5", // 刷新快捷键（通用F5）
+  //         click: () => {
+  //           mainWindow.reload(); // 刷新当前窗口
+  //         },
+  //       },
+  //       {
+  //         type: "separator", // 分隔线，美化菜单
+  //       },
+  //       {
+  //         label: "退出",
+  //         accelerator: "CmdOrCtrl+Q", // 跨平台退出快捷键（Mac:Cmd+Q / Win:Ctrl+Q）
+  //         click: () => {
+  //           app.quit(); // 退出应用
+  //         },
+  //       },
+  //     ],
+  //   },
+  // ];
+
+  // ========== 自定义菜单栏核心代码（无外层包裹） ==========
+  const menuTemplate = [
+    {
+      label: "刷新",
+      accelerator: "F5", // 刷新快捷键
+      click: () => {
+        // 开发模式重新加载devServer，生产模式reload
+        if (developing) {
+          mainWindow.loadURL("http://localhost:5173");
+        } else {
+          mainWindow.reload();
+        }
+      },
+    },
+    {
+      label: "退出",
+      accelerator: "CmdOrCtrl+Q", // 跨平台退出快捷键
+      click: () => {
+        app.quit();
+      },
+    },
+  ];
+
+  // 构建并设置自定义菜单
+  const customMenu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(customMenu);
+  // ========== 自定义菜单栏代码结束 ==========
 
   if (developing) {
     // 加载应用内容

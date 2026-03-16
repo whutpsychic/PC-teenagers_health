@@ -116,16 +116,16 @@ const setupChartOption1 = () => {
   title1.value = title
 
   const result = {
-    grid: { top: '20%', right: '5%', bottom: '15%', left: '5%' },
+    grid: { top: '10%', right: '5%', bottom: '15%', left: '5%' },
     tooltip: {},
     toolbox: { feature: { saveAsImage: {} } },
     legend: {
       data: ['身高3rd', '身高10th', '身高25th', '身高50th', '身高75th', '身高90th', '身高97th', '体重3rd', '体重10th', '体重25th', '体重50th', '体重75th', '体重90th', '体重97th']
     },
-    xAxis: { type: 'category', data: chartXaxis.value, boundaryGap: false, axisLabel: { interval: 0 } },
+    xAxis: { type: 'category', data: chartXaxis.value, boundaryGap: false, axisLabel: { interval: 0 }, splitLine: { show: true } },
     yAxis: [
-      { type: 'value', name: '身高（cm）', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, splitNumber: 20 },
-      { type: 'value', name: '体重（kg）', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, max: age.value === '1' ? 40 : 100 },
+      { type: 'value', name: '身高（cm）', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, splitNumber: 20, splitLine: { show: true } },
+      { type: 'value', name: '体重（kg）', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, max: age.value === '1' ? 40 : 100, splitNumber: 20, splitLine: { show: !viewlines1.value } },
     ],
     series: []
   }
@@ -134,24 +134,24 @@ const setupChartOption1 = () => {
 
   // 1系列标准线
   if (viewlines1.value) {
-    seriesData.push({ name: '身高3rd', type: 'line', data: heightLine1, yAxisIndex: 0, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '身高10th', type: 'line', data: heightLine2, yAxisIndex: 0, lineStyle: { type: 'dotted' } })
-    seriesData.push({ name: '身高25th', type: 'line', data: heightLine3, yAxisIndex: 0, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '身高50th', type: 'line', data: heightLine4, yAxisIndex: 0, lineStyle: { type: 'solid' } })
-    seriesData.push({ name: '身高75th', type: 'line', data: heightLine5, yAxisIndex: 0, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '身高90th', type: 'line', data: heightLine6, yAxisIndex: 0, lineStyle: { type: 'dotted' } })
-    seriesData.push({ name: '身高97th', type: 'line', data: heightLine7, yAxisIndex: 0, lineStyle: { type: 'dashed' } })
+    seriesData.push({ name: '身高3rd', type: 'line', data: heightLine1, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '身高10th', type: 'line', data: heightLine2, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '身高25th', type: 'line', data: heightLine3, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '身高50th', type: 'line', data: heightLine4, yAxisIndex: 0, lineStyle: { type: 'solid', width: 1 } })
+    seriesData.push({ name: '身高75th', type: 'line', data: heightLine5, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '身高90th', type: 'line', data: heightLine6, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '身高97th', type: 'line', data: heightLine7, yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1 } })
   }
 
   // 2系列标准线
   if (viewlines2.value) {
-    seriesData.push({ name: '体重3rd', type: 'line', data: weightLine1, yAxisIndex: 1, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '体重10th', type: 'line', data: weightLine2, yAxisIndex: 1, lineStyle: { type: 'dotted' } })
-    seriesData.push({ name: '体重25th', type: 'line', data: weightLine3, yAxisIndex: 1, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '体重50th', type: 'line', data: weightLine4, yAxisIndex: 1, lineStyle: { type: 'solid' } })
-    seriesData.push({ name: '体重75th', type: 'line', data: weightLine5, yAxisIndex: 1, lineStyle: { type: 'dashed' } })
-    seriesData.push({ name: '体重90th', type: 'line', data: weightLine6, yAxisIndex: 1, lineStyle: { type: 'dotted' } })
-    seriesData.push({ name: '体重97th', type: 'line', data: weightLine7, yAxisIndex: 1, lineStyle: { type: 'dashed' } })
+    seriesData.push({ name: '体重3rd', type: 'line', data: weightLine1, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '体重10th', type: 'line', data: weightLine2, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '体重25th', type: 'line', data: weightLine3, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '体重50th', type: 'line', data: weightLine4, yAxisIndex: 1, lineStyle: { type: 'solid', width: 1 } })
+    seriesData.push({ name: '体重75th', type: 'line', data: weightLine5, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '体重90th', type: 'line', data: weightLine6, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
+    seriesData.push({ name: '体重97th', type: 'line', data: weightLine7, yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1 } })
   }
 
   // 如果存在有个人数据
@@ -249,15 +249,15 @@ const setupChartOption2 = () => {
   title2.value = title
 
   const seriesData: any = [
-    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'dashed' } },
-    { name: '5th', type: 'line', data: bmiLine2, lineStyle: { type: 'dotted' } },
-    { name: '10th', type: 'line', data: bmiLine3, lineStyle: { type: 'dashed' } },
-    { name: '15th', type: 'line', data: bmiLine4, lineStyle: { type: 'dotted' } },
-    { name: '50th', type: 'line', data: bmiLine5, lineStyle: { type: 'solid' } },
-    { name: '85th', type: 'line', data: bmiLine6, lineStyle: { type: 'dotted' } },
-    { name: '90th', type: 'line', data: bmiLine7, lineStyle: { type: 'dashed' } },
-    { name: '95th', type: 'line', data: bmiLine8, lineStyle: { type: 'dotted' } },
-    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'dashed' } }
+    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '5th', type: 'line', data: bmiLine2, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '10th', type: 'line', data: bmiLine3, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '15th', type: 'line', data: bmiLine4, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '50th', type: 'line', data: bmiLine5, lineStyle: { type: 'solid', width: 1 } },
+    { name: '85th', type: 'line', data: bmiLine6, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '90th', type: 'line', data: bmiLine7, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '95th', type: 'line', data: bmiLine8, lineStyle: { type: 'dashed', width: 1 } },
+    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'dashed', width: 1 } }
   ]
 
   const result = {
@@ -267,8 +267,8 @@ const setupChartOption2 = () => {
     legend: {
       data: ['3rd', '5th', '10th', '15th', '50th', '85th', '90th', '95th', '97th']
     },
-    xAxis: { type: 'category', data: chartXaxis.value, boundaryGap: false, axisLabel: { interval: 0 } },
-    yAxis: { type: 'value', name: 'BMI', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, min: 10 },
+    xAxis: { type: 'category', data: chartXaxis.value, boundaryGap: false, axisLabel: { interval: 0 }, splitLine: { show: true } },
+    yAxis: { type: 'value', name: 'BMI', nameTextStyle: { fontWeight: 'bold' }, splitNumber: 20, axisLine: { show: true }, min: 8 },
     series: []
   }
 
