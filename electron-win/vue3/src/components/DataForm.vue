@@ -94,7 +94,7 @@ const onCalculate = () => {
 
   if (weight && height) {
     const result = (weight / height * 100) / (height / 100)
-    formData.bmi = result
+    formData.bmi = Number(result.toFixed(2))
   }
 }
 

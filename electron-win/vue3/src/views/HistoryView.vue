@@ -51,16 +51,16 @@
         <el-table-column prop="bmi" label="BMI" align="center">
           <template #default="scope">
             <span v-if="scope.row.bmi && (scope.row.bmi < 18.5)" style="font-weight:bold;color: #87CEFA;">
-              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(2) : '' }}
             </span>
             <span v-else-if="scope.row.bmi && (scope.row.bmi <= 23.9)" style="font-weight:bold;color: green;">
-              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(2) : '' }}
             </span>
             <span v-else-if="scope.row.bmi && (scope.row.bmi <= 27.9)" style="font-weight:bold;color: orange;">
-              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(2) : '' }}
             </span>
             <span v-else style="font-weight:bold;color: red;">
-              {{ scope.row.bmi ? scope.row.bmi.toFixed(dd) : '' }}
+              {{ scope.row.bmi ? scope.row.bmi.toFixed(2) : '' }}
             </span>
           </template>
         </el-table-column>
