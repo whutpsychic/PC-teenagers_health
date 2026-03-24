@@ -19,11 +19,11 @@
             :disabled="selectedRows.length <= 0">批量删除</el-button>
         </el-form-item>
         <el-form-item class="fi">
-          <el-button type="primary" :icon="View" @click="() => viewInChart(allData)"
+          <el-button type="primary" :icon="View" @click="() => viewInChart()"
             :disabled="allData.length <= 0">所有数据代入曲线图</el-button>
         </el-form-item>
         <el-form-item class="fi" v-if="debugging">
-          <el-button @click="onTest">添加n条测试数据</el-button>
+          <el-button @click="onTest">添加 24 条测试数据</el-button>
         </el-form-item>
         <el-form-item class="fi" v-if="debugging">
           <el-button @click="onTest2">清空数据库</el-button>
@@ -125,6 +125,7 @@ const searchForm = reactive({
 })
 
 const allData = ref<Databar[]>([]) // 所有数据
+const allTableData = ref<Databar[]>([]) // 所有经筛选过的表格数据
 const tableData = ref<Databar[]>([]) // 表格数据(查看用)
 const selectedRows = ref<Databar[]>([]) // 表格选择项
 
@@ -144,8 +145,9 @@ const calcTableData = async () => {
   const arr = allData.value.filter((item: any) => {
     return (item.name!.includes(name)) && (`${item.number!}`.includes(number))
   })
-  const result = arr.slice((current - 1) * pageSize, current * pageSize);
+  allTableData.value = arr
 
+  const result = arr.slice((current - 1) * pageSize, current * pageSize);
   tableData.value = result
   pagin.total = arr.length
 }
@@ -188,9 +190,6 @@ const onSearch = () => {
 const onAdd = async () => {
   formMode.value = 'add'
   viewDrawer.value = true
-  setTimeout(() => {
-    dataForm.value.clear()
-  }, 0)
 }
 
 // 编辑
@@ -214,6 +213,9 @@ const onSaveDataLine = async (data: Databar) => {
           message: '新增数据成功',
           type: 'success',
         })
+        setTimeout(() => {
+          dataForm.value.clear()
+        }, 0)
         calcTableData()
       } catch (error) {
         console.error(error)
@@ -228,6 +230,9 @@ const onSaveDataLine = async (data: Databar) => {
           message: '修改数据成功',
           type: 'success',
         })
+        setTimeout(() => {
+          dataForm.value.clear()
+        }, 0)
         calcTableData()
       } catch (error) {
         console.error(error)
@@ -290,8 +295,41 @@ const onBatchDelete = async () => {
     })
 }
 
-const viewInChart = (arr: any[]) => {
-  emits('viewInChart', arr)
+// 代入到曲线图查看数据
+const viewInChart = (arr?: any) => {
+  // 行内查看单条数据
+  if (arr instanceof Array && arr.length > 0) {
+    emits('viewInChart', arr)
+  } else {
+    // 如果有已选中的数据
+    if (selectedRows.value && selectedRows.value.length > 0) {
+      // 判断是不是同一登记号
+      const num = selectedRows.value[0]?.number
+      const numValid = selectedRows.value.every((item) => item.number == num)
+
+      if (numValid) {
+        emits('viewInChart', selectedRows.value)
+      }
+      // 如果不是则拒绝操作
+      else {
+        ElMessage.error({ message: '非同一登记号不可同时代入' })
+      }
+    }
+    // 否则代入全部的表格数据
+    else {
+      // 判断是不是同一登记号
+      const num = allTableData.value[0]?.number
+      const numValid = allTableData.value.every((item) => item.number == num)
+
+      if (numValid) {
+        emits('viewInChart', allTableData.value)
+      }
+      // 如果不是则拒绝操作
+      else {
+        ElMessage.error({ message: '非同一登记号不可同时代入' })
+      }
+    }
+  }
 }
 
 onMounted(async () => {
@@ -316,7 +354,8 @@ const onTest = () => {
         sex: i < 10 ? '男' : '女',
         age: growthData.ages2[i],
         time: Date.now(),
-        number: `123456${i >= 10 ? i - 10 : i}`,
+        // number: `123456${i >= 10 ? i - 10 : i}`,
+        number: `1234567`,
         height: h,
         weight: w,
         bmi: (w / h * 100) / (h / 100)

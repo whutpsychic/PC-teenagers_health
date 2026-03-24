@@ -1,5 +1,3 @@
-// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 // main.js
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");

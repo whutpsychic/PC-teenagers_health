@@ -8,7 +8,7 @@
         <el-tab-pane label="主程序" name="tab1">
           <MainView ref="view1" />
         </el-tab-pane>
-        <el-tab-pane label="历史数据" name="tab2">
+        <el-tab-pane label="历史检查数据" name="tab2">
           <HistoryView ref="view2" @view-in-chart="onView" />
         </el-tab-pane>
       </el-tabs>

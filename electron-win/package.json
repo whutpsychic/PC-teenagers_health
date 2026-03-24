@@ -1,6 +1,6 @@
 {
   "name": "pc-teenagers-health",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "This is a mini-program serving an unknown department in an unnamed hospital.",
   "main": "main.js",
   "scripts": {
