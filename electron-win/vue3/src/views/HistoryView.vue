@@ -20,7 +20,10 @@
         </el-form-item>
         <el-form-item class="fi">
           <el-button type="primary" :icon="View" @click="() => viewInChart()"
-            :disabled="allData.length <= 0">所有数据代入曲线图</el-button>
+            :disabled="allData.length <= 0">代入曲线图</el-button>
+        </el-form-item>
+        <el-form-item class="fi">
+          <el-button type="primary" :icon="Download" @click="onExport" :disabled="allData.length <= 0">导出数据</el-button>
         </el-form-item>
         <el-form-item class="fi" v-if="debugging">
           <el-button @click="onTest">添加 24 条测试数据</el-button>
@@ -66,7 +69,7 @@
         </el-table-column>
         <el-table-column prop="time" label="检查时间" align="center" width="220">
           <template #default="scope">
-            <span>{{ dayjs(scope.row.time).format('YYYY-MM-DD') }}</span>
+            <span>{{ scope.row.time ? dayjs(scope.row.time).format('YYYY-MM-DD') : ' — ' }}</span>
           </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" align="center" min-width="100">
@@ -103,10 +106,11 @@ import { ref, reactive, onMounted } from 'vue'
 import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
 import BMIboard from '@/components/BMIboard.vue'
-import { Search, Plus, Delete, WarningFilled, InfoFilled, Edit, View } from '@element-plus/icons-vue'
+import { Search, Plus, Delete, WarningFilled, InfoFilled, Edit, View, Download } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { growthData } from '@/static/data'
+import { exportExcel } from '@/utils/excel-export'
 import { debugging } from '@/appConfig'
 
 const emits = defineEmits(['viewInChart'])
@@ -404,6 +408,19 @@ const onTest2 = async () => {
       })
       calcTableData()
     })
+}
+
+const onExport = () => {
+  exportExcel(allData.value, [
+    { key: 'id', label: '用户ID' },
+    { key: 'name', label: '姓名' },
+    { key: 'sex', label: '性别' },
+    { key: 'time', label: '检查时间', isTime: true },
+    { key: 'age', label: '年龄' },
+    { key: 'number', label: '登记号' },
+    { key: 'height', label: '身高（cm）' },
+    { key: 'weight', label: '体重（kg）' },
+  ], '数据列表.xlsx');
 }
 
 const refreshTable = () => {

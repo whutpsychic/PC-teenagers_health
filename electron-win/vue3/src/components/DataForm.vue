@@ -50,6 +50,7 @@ import { reactive, ref } from 'vue'
 import { Histogram, Operation } from '@element-plus/icons-vue'
 import type { FormRules } from 'element-plus'
 import { growthData } from '@/static/data'
+import dayjs from 'dayjs'
 
 const emits = defineEmits(['save'])
 
@@ -61,7 +62,7 @@ const formData = reactive<Databar>({
   id: null,
   name: null,
   sex: null,
-  time: null,
+  time: dayjs().format('YYYY-MM-DD'),
   age: null,
   number: null,
   height: null,
@@ -82,7 +83,7 @@ const validateSevenDigitNumber = (rule: any, value: any, callback: any) => {
 const formRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  time: [{ required: true, message: '请选择日期', trigger: ['blur', 'change'] }],
+  // time: [{ required: true, message: '请选择日期', trigger: ['blur', 'change'] }],
   age: [{ required: true, message: '请输入年龄', trigger: 'blur' }],
   number: [{ required: true, validator: validateSevenDigitNumber, trigger: 'blur' }],
   height: [{ required: true, message: '请输入身高', trigger: ['blur', 'change'] }],

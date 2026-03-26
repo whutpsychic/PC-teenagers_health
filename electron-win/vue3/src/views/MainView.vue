@@ -146,21 +146,21 @@ const insertExtraValues = (base: any[]) => {
 const setupChartOption1 = () => {
   const key = sex.value === '男' ? 'male' : 'female'
 
-  const heightLine1 = age.value === '1' ? growthData[key].height['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].height['3rd'].slice(12, 42) : []
-  const heightLine2 = age.value === '1' ? growthData[key].height['10th'].slice(0, 12) : age.value === '2' ? growthData[key].height['10th'].slice(12, 42) : []
-  const heightLine3 = age.value === '1' ? growthData[key].height['25th'].slice(0, 12) : age.value === '2' ? growthData[key].height['25th'].slice(12, 42) : []
-  const heightLine4 = age.value === '1' ? growthData[key].height['50th'].slice(0, 12) : age.value === '2' ? growthData[key].height['50th'].slice(12, 42) : []
-  const heightLine5 = age.value === '1' ? growthData[key].height['75th'].slice(0, 12) : age.value === '2' ? growthData[key].height['75th'].slice(12, 42) : []
-  const heightLine6 = age.value === '1' ? growthData[key].height['90th'].slice(0, 12) : age.value === '2' ? growthData[key].height['90th'].slice(12, 42) : []
-  const heightLine7 = age.value === '1' ? growthData[key].height['97th'].slice(0, 12) : age.value === '2' ? growthData[key].height['97th'].slice(12, 42) : []
+  const heightLine1 = age.value === '1' ? growthData[key].height['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].height['3rd'].slice(11, 42) : []
+  const heightLine2 = age.value === '1' ? growthData[key].height['10th'].slice(0, 12) : age.value === '2' ? growthData[key].height['10th'].slice(11, 42) : []
+  const heightLine3 = age.value === '1' ? growthData[key].height['25th'].slice(0, 12) : age.value === '2' ? growthData[key].height['25th'].slice(11, 42) : []
+  const heightLine4 = age.value === '1' ? growthData[key].height['50th'].slice(0, 12) : age.value === '2' ? growthData[key].height['50th'].slice(11, 42) : []
+  const heightLine5 = age.value === '1' ? growthData[key].height['75th'].slice(0, 12) : age.value === '2' ? growthData[key].height['75th'].slice(11, 42) : []
+  const heightLine6 = age.value === '1' ? growthData[key].height['90th'].slice(0, 12) : age.value === '2' ? growthData[key].height['90th'].slice(11, 42) : []
+  const heightLine7 = age.value === '1' ? growthData[key].height['97th'].slice(0, 12) : age.value === '2' ? growthData[key].height['97th'].slice(11, 42) : []
 
-  const weightLine1 = age.value === '1' ? growthData[key].weight['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].weight['3rd'].slice(12, 42) : []
-  const weightLine2 = age.value === '1' ? growthData[key].weight['10th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['10th'].slice(12, 42) : []
-  const weightLine3 = age.value === '1' ? growthData[key].weight['25th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['25th'].slice(12, 42) : []
-  const weightLine4 = age.value === '1' ? growthData[key].weight['50th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['50th'].slice(12, 42) : []
-  const weightLine5 = age.value === '1' ? growthData[key].weight['75th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['75th'].slice(12, 42) : []
-  const weightLine6 = age.value === '1' ? growthData[key].weight['90th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['90th'].slice(12, 42) : []
-  const weightLine7 = age.value === '1' ? growthData[key].weight['97th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['97th'].slice(12, 42) : []
+  const weightLine1 = age.value === '1' ? growthData[key].weight['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].weight['3rd'].slice(11, 42) : []
+  const weightLine2 = age.value === '1' ? growthData[key].weight['10th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['10th'].slice(11, 42) : []
+  const weightLine3 = age.value === '1' ? growthData[key].weight['25th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['25th'].slice(11, 42) : []
+  const weightLine4 = age.value === '1' ? growthData[key].weight['50th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['50th'].slice(11, 42) : []
+  const weightLine5 = age.value === '1' ? growthData[key].weight['75th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['75th'].slice(11, 42) : []
+  const weightLine6 = age.value === '1' ? growthData[key].weight['90th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['90th'].slice(11, 42) : []
+  const weightLine7 = age.value === '1' ? growthData[key].weight['97th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['97th'].slice(11, 42) : []
 
   const title = {
     text: age.value === '1' ? `中国0~3岁儿童（${sex.value}）身高、体重百分位曲线图` : age.value === '2' ? `中国3~18岁儿童（${sex.value}）身高、体重百分位曲线图` : '???',
@@ -175,7 +175,7 @@ const setupChartOption1 = () => {
 
   // 横坐标(各刻度之间新增3个虚拟刻度)
   const chartXaxis = computed(() => {
-    const arr = age.value === '1' ? growthData.ages.slice(0, 12) : age.value === '2' ? growthData.ages.slice(12, 42) : []
+    const arr = age.value === '1' ? growthData.ages.slice(0, 12) : age.value === '2' ? growthData.ages.slice(11, 42) : []
     // return arr
     return dealWithDataArr(arr)
   })
@@ -208,24 +208,24 @@ const setupChartOption1 = () => {
 
   // 1系列标准线
   if (viewlines1.value) {
-    seriesData.push({ name: '身高3rd', type: 'line', data: insertExtraValues(heightLine1), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '身高3rd', type: 'line', data: insertExtraValues(heightLine1), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
     seriesData.push({ name: '身高10th', type: 'line', data: insertExtraValues(heightLine2), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
     seriesData.push({ name: '身高25th', type: 'line', data: insertExtraValues(heightLine3), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
     seriesData.push({ name: '身高50th', type: 'line', data: insertExtraValues(heightLine4), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize: pointSize })
     seriesData.push({ name: '身高75th', type: 'line', data: insertExtraValues(heightLine5), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
     seriesData.push({ name: '身高90th', type: 'line', data: insertExtraValues(heightLine6), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高97th', type: 'line', data: insertExtraValues(heightLine7), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '身高97th', type: 'line', data: insertExtraValues(heightLine7), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
   }
 
   // 2系列标准线
   if (viewlines2.value) {
-    seriesData.push({ name: '体重3rd', type: 'line', data: insertExtraValues(weightLine1), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '体重3rd', type: 'line', data: insertExtraValues(weightLine1), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
     seriesData.push({ name: '体重10th', type: 'line', data: insertExtraValues(weightLine2), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
     seriesData.push({ name: '体重25th', type: 'line', data: insertExtraValues(weightLine3), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
     seriesData.push({ name: '体重50th', type: 'line', data: insertExtraValues(weightLine4), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize: pointSize })
     seriesData.push({ name: '体重75th', type: 'line', data: insertExtraValues(weightLine5), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
     seriesData.push({ name: '体重90th', type: 'line', data: insertExtraValues(weightLine6), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重97th', type: 'line', data: insertExtraValues(weightLine7), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '体重97th', type: 'line', data: insertExtraValues(weightLine7), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
   }
 
   // 如果存在有个人数据
@@ -341,7 +341,7 @@ const setupChartOption2 = () => {
   }
 
   const seriesData: any = viewlines0.value ? [
-    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize },
+    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize },
     { name: '5th', type: 'line', data: bmiLine2, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize },
     { name: '10th', type: 'line', data: bmiLine3, lineStyle: { type: 'dashed', width: 1, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize: pointSize },
     { name: '15th', type: 'line', data: bmiLine4, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize },
@@ -349,7 +349,7 @@ const setupChartOption2 = () => {
     { name: '85th', type: 'line', data: bmiLine6, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize },
     { name: '90th', type: 'line', data: bmiLine7, lineStyle: { type: 'dashed', width: 1, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize: pointSize },
     { name: '95th', type: 'line', data: bmiLine8, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize },
-    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'dashed', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize }
+    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize }
   ] : []
 
   const xAxisData = growthData.ages2
@@ -451,7 +451,7 @@ const onChangeAge = (v: string) => {
 }
 
 const addFakeData = () => {
-  // 添加20条测试数据 
+  // 添加24条测试数据 
   const arr = []
   for (let i = 1; i < 8; i++) {
     const h = Math.floor(Math.random() * (100 - 60 + 1)) + 60
@@ -473,8 +473,25 @@ const addFakeData = () => {
 
 const setupData = (arr: any[]) => {
   mainData.value = arr
-  setupChartOption1()
-  setupChartOption2()
+  console.log(arr)
+  const target = arr[0]
+  // 自动代入性别
+  if (target.sex === '男') {
+    sex.value = '男'
+  } else if (target.sex === '女') {
+    sex.value = '女'
+  }
+  // 自动代入年龄段
+  if (target.age.includes('岁') && !target.age.includes('2')) {
+    age.value = '2'
+  } else {
+    age.value = '1'
+  }
+  // 根据过来的数据自动切换性别和年龄
+  setTimeout(() => {
+    setupChartOption1()
+    setupChartOption2()
+  }, 0)
 }
 
 onMounted(() => {

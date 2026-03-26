@@ -9,7 +9,8 @@ const developing = false;
 // app.name = "Teens_health"; // ← 应用名
 
 // 数据存储文件路径
-const DATA_FILE = path.join(app.getPath("userData"), "data.json");
+// const DATA_FILE = path.join(app.getPath("userData"), "data.json");
+const DATA_FILE = path.join(process.cwd(), "data.json");
 
 // 初始化数据文件
 async function initializeDataFile() {
