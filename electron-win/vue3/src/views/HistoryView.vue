@@ -25,10 +25,10 @@
         <el-form-item class="fi">
           <el-button type="primary" :icon="Download" @click="onExport" :disabled="allData.length <= 0">导出数据</el-button>
         </el-form-item>
-        <el-form-item class="fi" v-if="debugging">
+        <el-form-item class="fi" v-if="developing">
           <el-button @click="onTest">添加 24 条测试数据</el-button>
         </el-form-item>
-        <el-form-item class="fi" v-if="debugging">
+        <el-form-item class="fi" v-if="developing">
           <el-button @click="onTest2">清空数据库</el-button>
         </el-form-item>
       </el-form>
@@ -111,7 +111,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 import { growthData } from '@/static/data'
 import { exportExcel } from '@/utils/excel-export'
-import { debugging } from '@/appConfig'
+import { developing } from '@/appConfig'
 
 const emits = defineEmits(['viewInChart'])
 

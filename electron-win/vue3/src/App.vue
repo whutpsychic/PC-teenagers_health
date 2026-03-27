@@ -5,7 +5,7 @@
   <main class="main-body">
     <div class="inner-view">
       <el-tabs v-model="activeTabName" class="demo-tabs" @tab-change="handleChangeTab">
-        <el-tab-pane label="主程序" name="tab1">
+        <el-tab-pane label="曲线图" name="tab1">
           <MainView ref="view1" />
         </el-tab-pane>
         <el-tab-pane label="历史检查数据" name="tab2">

@@ -34,18 +34,17 @@ export function exportExcel<T>(
   fileName = '数据导出.xlsx',
   sheetName = 'Sheet1',
 ) {
+
+  const filteredHeaders = headers.filter(h => h.key !== 'id');
   // 1. 处理数据：中文表头 + 时间戳格式化
   const exportData = data.map((item) => {
     const row: Record<string, any> = {}
-
-    headers.forEach(({ key, label, isTime }) => {
+    filteredHeaders.forEach(({ key, label, isTime }) => {
       let value: any = item[key]
-
       // 如果是时间戳，自动格式化
       if (isTime && value) {
         value = formatTimestamp(value as number | string)
       }
-
       row[label] = value
     })
 

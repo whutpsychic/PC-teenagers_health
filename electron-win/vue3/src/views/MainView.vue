@@ -76,7 +76,7 @@ import Echarts from '@/components/Echart.vue'
 import { growthData } from '@/static/data'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
-import { debugging } from '@/appConfig'
+import { developing } from '@/appConfig'
 // 显示编辑抽屉
 const viewDrawer = ref<boolean>(false)
 
@@ -496,7 +496,7 @@ const setupData = (arr: any[]) => {
 
 onMounted(() => {
   // 
-  if (debugging) {
+  if (developing) {
     addFakeData()
   }
 
