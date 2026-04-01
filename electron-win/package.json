@@ -10,6 +10,16 @@
     "make": "electron-forge make"
   },
   "author": "zbc",
+  "build": {
+    "appId": "com.zbc.teenagers_health",
+    "win": {
+      "target": "nsis",
+      "arch": [
+        "x64"
+      ],
+      "vcRedist": true
+    }
+  },
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^7.11.1",
