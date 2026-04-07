@@ -26,7 +26,7 @@
           <el-button type="primary" :icon="Download" @click="onExport" :disabled="allData.length <= 0">导出数据</el-button>
         </el-form-item>
         <el-form-item class="fi" v-if="developing">
-          <el-button @click="onTest">添加 24 条测试数据</el-button>
+          <el-button @click="onTest">添加 n 条测试数据</el-button>
         </el-form-item>
         <el-form-item class="fi" v-if="developing">
           <el-button @click="onTest2">清空数据库</el-button>
@@ -39,7 +39,11 @@
         <el-table-column type="selection" align="center" width="55" />
         <el-table-column prop="name" label="姓名" align="center" width="180" />
         <el-table-column prop="sex" label="性别" align="center" width="100" />
-        <el-table-column prop="age" label="年龄" align="center" />
+        <el-table-column prop="age" label="年龄" align="center">
+          <template #default="scope">
+            {{ formatAgeText(scope.row.age) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="number" label="登记号" align="center" />
         <el-table-column prop="height" label="身高" align="center">
           <template #default="scope">
@@ -99,6 +103,9 @@
   <el-dialog v-model="viewBmiInfo" title="BMI指数参考信息">
     <BMIboard />
   </el-dialog>
+  <!-- <div style="display: flex;justify-content: flex-end;margin-bottom: 20px;">
+    <el-button :icon="Operation" round @click="onExecuteOldData">转换旧数据</el-button>
+  </div> -->
 </template>
 
 <script setup lang="ts">
@@ -109,8 +116,9 @@ import BMIboard from '@/components/BMIboard.vue'
 import { Search, Plus, Delete, WarningFilled, InfoFilled, Edit, View, Download } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
-import { growthData } from '@/static/data'
+import { growthData } from '@/static/data2'
 import { exportExcel } from '@/utils/excel-export'
+import { formatAgeText } from '@/utils/tool'
 import { developing } from '@/appConfig'
 
 const emits = defineEmits(['viewInChart'])
@@ -342,9 +350,9 @@ onMounted(async () => {
 
 const onTest = () => {
   const { electronAPI } = window as any
-  // 添加20条测试数据 
+  // 添加 n 条测试数据 
   const arr = []
-  const n = 24
+  const n = 5
   const splitTime = 30
 
   for (let i = 0; i < n; i++) {
@@ -356,7 +364,7 @@ const onTest = () => {
         id: i,
         name: `测试姓名${i + 1}`,
         sex: i < 10 ? '男' : '女',
-        age: growthData.ages2[i],
+        age: growthData.ages2[i + 12],
         time: Date.now(),
         // number: `123456${i >= 10 ? i - 10 : i}`,
         number: `1234567`,
@@ -416,11 +424,16 @@ const onExport = () => {
     { key: 'name', label: '姓名' },
     { key: 'sex', label: '性别' },
     { key: 'time', label: '检查时间', isTime: true },
-    { key: 'age', label: '年龄' },
+    { key: 'age', label: '年龄', isAge: true },
     { key: 'number', label: '登记号' },
     { key: 'height', label: '身高（cm）' },
     { key: 'weight', label: '体重（kg）' },
+    { key: 'bmi', label: 'BMI指数' },
   ], '数据列表.xlsx');
+}
+
+const onExecuteOldData = () => {
+  console.log(`onExecuteOldData`)
 }
 
 const refreshTable = () => {

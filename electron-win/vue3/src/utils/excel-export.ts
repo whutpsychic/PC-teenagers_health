@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx'
+import { formatAgeText } from './tool'
 
 /**
  * 时间戳格式化工具
@@ -30,20 +31,23 @@ function formatTimestamp(timestamp: number | string): string {
  */
 export function exportExcel<T>(
   data: T[],
-  headers: Array<{ key: keyof T; label: string; isTime?: boolean }>,
+  headers: Array<{ key: keyof T; label: string; isTime?: boolean; isAge?: boolean }>,
   fileName = '数据导出.xlsx',
   sheetName = 'Sheet1',
 ) {
-
-  const filteredHeaders = headers.filter(h => h.key !== 'id');
+  const filteredHeaders = headers.filter((h) => h.key !== 'id')
   // 1. 处理数据：中文表头 + 时间戳格式化
   const exportData = data.map((item) => {
     const row: Record<string, any> = {}
-    filteredHeaders.forEach(({ key, label, isTime }) => {
+    filteredHeaders.forEach(({ key, label, isTime, isAge }) => {
       let value: any = item[key]
       // 如果是时间戳，自动格式化
       if (isTime && value) {
         value = formatTimestamp(value as number | string)
+      }
+      // 如果是年龄，自动格式化
+      if (isAge && value) {
+        value = formatAgeText(value as number | string)
       }
       row[label] = value
     })

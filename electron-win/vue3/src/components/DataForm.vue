@@ -7,7 +7,7 @@
         <el-input v-model="formData.name" placeholder="请输入姓名" :style="`width:${itemWidth}px;`" />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select v-model="formData.sex" placeholder="请选择姓名" :style="`width:${itemWidth}px;`">
+        <el-select v-model="formData.sex" placeholder="请选择型别" :style="`width:${itemWidth}px;`">
           <el-option label="男" value="男"></el-option>
           <el-option label="女" value="女"></el-option>
         </el-select>
@@ -15,12 +15,19 @@
       <el-form-item label="检查时间" prop="time">
         <el-date-picker v-model="formData.time" placeholder="请选择时间" :style="`width:${itemWidth}px;`" value-format="x" />
       </el-form-item>
-      <el-form-item label="年龄" prop="age">
-        <!-- <el-input v-model="formData.age" placeholder="请输入年龄，例如：2.5岁 或 30个月" :style="`width:${itemWidth}px;`" /> -->
+      <!-- <el-form-item label="年龄" prop="age">
         <el-select v-model="formData.age" placeholder="请选择年龄层" :style="`width:${itemWidth}px;`">
           <el-option v-for="(item) in [...growthData.ages, ...growthData.ages2]" :key="item" :label="item"
             :value="item"></el-option>
         </el-select>
+      </el-form-item> -->
+      <el-form-item label="周岁" prop="age1">
+        <el-input-number v-model="formData.age1" placeholder="请输入周岁年龄" :min="0" :max="18" :step="1" step-strictly
+          :style="`width:${itemWidth}px;`"></el-input-number>
+      </el-form-item>
+      <el-form-item label="月份" prop="age2">
+        <el-input-number v-model="formData.age2" placeholder="请输入周岁年龄" :min="0" :max="11" :step="1" step-strictly
+          :style="`width:${itemWidth}px;`"></el-input-number>
       </el-form-item>
       <el-form-item label="登记号" prop="number">
         <el-input v-model="formData.number" placeholder="请输入登记号(七位数字)" :style="`width:${itemWidth}px;`" />
@@ -49,7 +56,6 @@
 import { reactive, ref } from 'vue'
 import { Histogram, Operation } from '@element-plus/icons-vue'
 import type { FormRules } from 'element-plus'
-import { growthData } from '@/static/data'
 import dayjs from 'dayjs'
 
 const emits = defineEmits(['save'])
@@ -63,7 +69,9 @@ const formData = reactive<Databar>({
   name: null,
   sex: null,
   time: dayjs().format('YYYY-MM-DD'),
-  age: null,
+  age: 0,
+  age1: 0,
+  age2: 0,
   number: null,
   height: null,
   weight: null,
@@ -83,8 +91,8 @@ const validateSevenDigitNumber = (rule: any, value: any, callback: any) => {
 const formRules = reactive<FormRules>({
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
-  // time: [{ required: true, message: '请选择日期', trigger: ['blur', 'change'] }],
-  age: [{ required: true, message: '请输入年龄', trigger: 'blur' }],
+  age1: [{ required: true, message: '请输入周岁年龄', trigger: 'blur' }],
+  age2: [{ required: true, message: '请输入月数', trigger: 'blur' }],
   number: [{ required: true, validator: validateSevenDigitNumber, trigger: 'blur' }],
   height: [{ required: true, message: '请输入身高', trigger: ['blur', 'change'] }],
   weight: [{ required: true, message: '请输入体重', trigger: ['blur', 'change'] }],
@@ -107,6 +115,8 @@ const onSave = () => {
       if (!formData.id) {
         formData.id = Date.now()
       }
+
+      formData.age = (formData.age1) * 12 + formData.age2
       // 开始准备保存数据
       emits('save', formData)
     }
@@ -123,8 +133,29 @@ const clear = () => {
 const setupData = (data: any) => {
   const keys = Object.keys(formData) as (keyof Databar)[];
   for (const key of keys) {
-    formData[key] = data[key]; // ✅ TS 现在能正确推断每个 key 的类型！
+    if (key == 'age' || key == 'age1' || key == 'age2') {
+      // formData[key] = data[key] as number;
+    } else {
+      formData[key] = data[key]; // ✅ TS 现在能正确推断每个 key 的类型！
+    }
   }
+
+  const a = Math.floor(data.age / 12)
+  const b = data.age - a * 12
+
+  // 安排年龄数据
+  if (!data.age1) {
+    formData[`age1`] = a
+  } else {
+    formData[`age1`] = data.age1
+  }
+
+  if (!data.age2) {
+    formData[`age2`] = b
+  } else {
+    formData[`age2`] = data.age2
+  }
+
 }
 
 defineExpose({ clear, setupData })

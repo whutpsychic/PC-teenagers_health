@@ -7,7 +7,8 @@ import { ref, onMounted, watch } from 'vue'
 import * as echarts from 'echarts';
 
 const props = defineProps({
-  option: { type: Object, default: () => ({}) }
+  option: { type: Object, default: () => ({}) },
+  loading: { type: Boolean, default: false }
 })
 
 const cc = ref()
@@ -24,6 +25,14 @@ onMounted(() => {
 watch(() => props.option, (newv, oldv) => {
   // chartInstance.value.clear()
   chartInstance.value.setOption(newv, true)
+})
+
+watch(() => props.loading, (newv) => {
+  if (newv) {
+    chartInstance.value.showLoading()
+  } else {
+    chartInstance.value.hideLoading()
+  }
 })
 
 </script>

@@ -42,7 +42,7 @@
       </ul>
     </div>
     <div class="chart-can">
-      <Echarts :option="chartOption1" />
+      <Echarts :option="chartOption1" :loading="loadingChart1" />
     </div>
   </Block>
   <Block>
@@ -59,7 +59,7 @@
       </ul>
     </div>
     <div class="chart-can">
-      <Echarts :option="chartOption2" />
+      <Echarts :option="chartOption2" :loading="loadingChart2" />
     </div>
   </Block>
   <el-drawer v-model="viewDrawer" title="检查数据录入">
@@ -68,15 +68,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from 'vue'
-import { Printer, Edit } from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { Edit } from '@element-plus/icons-vue'
 import Block from '@/components/Block.vue'
 import DataForm from '@/components/DataForm.vue'
 import Echarts from '@/components/Echart.vue'
-import { growthData } from '@/static/data'
+// import { growthData } from '@/static/data'
+import { growthData as growthData2 } from '@/static/data2'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import { developing } from '@/appConfig'
+// import { transformHWData, transformBMIData } from '@/utils/extend-data'
+import { formatAgeText } from '@/utils/tool'
 // 显示编辑抽屉
 const viewDrawer = ref<boolean>(false)
 
@@ -95,7 +98,16 @@ const viewLabelLines1 = ref<boolean>(true) // 显示落点数据的标签和连�
 const viewlines0 = ref<boolean>(true)   // 查看BMI参考线
 const viewLabelLines2 = ref<boolean>(true) // 显示落点数据的标签和连线
 
-const pointSize: number = 1
+const loadingChart1 = ref<boolean>(false) // 图表1数据加载中
+const loadingChart2 = ref<boolean>(false) // 图表2数据加载中
+
+const lineWidth: number = 1 // 曲线宽度
+const symbolSize: number = 0  // 曲线点尺寸
+
+const dotSymbolSize: number = 6 // 落点菱形尺寸
+const dotSymbolColor: string = `#233` // 落点菱形颜色
+
+const timeasync = 1000  // 延迟加载
 
 // 外部个人数据
 const mainData = ref<any>([])
@@ -105,62 +117,25 @@ const chartOption1 = ref({})
 // 图表2的option
 const chartOption2 = ref({})
 
-// 给xaxis插入额外值(仅0~3岁添加额外数据)
-const dealWithDataArr = (base: any[]) => {
-  const result = []
-  for (let i = 0; i < base.length; i++) {
-    if (i !== 0) {
-      result.push(``)
-      result.push(``)
-      result.push(``)
-    }
-    result.push(base[i])
-  }
-  return age.value == '1' ? result : base
-}
-
-// 给line添加补充值(仅0~3岁添加额外数据)
-const insertExtraValues = (base: any[]) => {
-  const result = []
-  for (let i = 0; i < base.length; i++) {
-    let currv = base[i]
-    let nextv = base[i + 1]
-    if (currv && nextv) {
-      let middlev = (currv + nextv) / 2
-      let mlv = (currv + middlev) / 2
-      let mrv = (middlev + nextv) / 2
-      result.push(currv)
-      result.push(mlv)
-      result.push(middlev)
-      result.push(mrv)
-    }
-    // 最后一项
-    else {
-      result.push(currv)
-    }
-  }
-  return age.value == '1' ? result : base
-}
-
 // 整理并给chart下料
 const setupChartOption1 = () => {
   const key = sex.value === '男' ? 'male' : 'female'
 
-  const heightLine1 = age.value === '1' ? growthData[key].height['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].height['3rd'].slice(11, 42) : []
-  const heightLine2 = age.value === '1' ? growthData[key].height['10th'].slice(0, 12) : age.value === '2' ? growthData[key].height['10th'].slice(11, 42) : []
-  const heightLine3 = age.value === '1' ? growthData[key].height['25th'].slice(0, 12) : age.value === '2' ? growthData[key].height['25th'].slice(11, 42) : []
-  const heightLine4 = age.value === '1' ? growthData[key].height['50th'].slice(0, 12) : age.value === '2' ? growthData[key].height['50th'].slice(11, 42) : []
-  const heightLine5 = age.value === '1' ? growthData[key].height['75th'].slice(0, 12) : age.value === '2' ? growthData[key].height['75th'].slice(11, 42) : []
-  const heightLine6 = age.value === '1' ? growthData[key].height['90th'].slice(0, 12) : age.value === '2' ? growthData[key].height['90th'].slice(11, 42) : []
-  const heightLine7 = age.value === '1' ? growthData[key].height['97th'].slice(0, 12) : age.value === '2' ? growthData[key].height['97th'].slice(11, 42) : []
+  const heightLine1 = age.value === '1' ? growthData2[key].height['3rd'].slice(0, 37) : age.value === '2' ? growthData2[key].height['3rd'].slice(36, 218) : []
+  const heightLine2 = age.value === '1' ? growthData2[key].height['10th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['10th'].slice(36, 218) : []
+  const heightLine3 = age.value === '1' ? growthData2[key].height['25th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['25th'].slice(36, 218) : []
+  const heightLine4 = age.value === '1' ? growthData2[key].height['50th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['50th'].slice(36, 218) : []
+  const heightLine5 = age.value === '1' ? growthData2[key].height['75th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['75th'].slice(36, 218) : []
+  const heightLine6 = age.value === '1' ? growthData2[key].height['90th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['90th'].slice(36, 218) : []
+  const heightLine7 = age.value === '1' ? growthData2[key].height['97th'].slice(0, 37) : age.value === '2' ? growthData2[key].height['97th'].slice(36, 218) : []
 
-  const weightLine1 = age.value === '1' ? growthData[key].weight['3rd'].slice(0, 12) : age.value === '2' ? growthData[key].weight['3rd'].slice(11, 42) : []
-  const weightLine2 = age.value === '1' ? growthData[key].weight['10th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['10th'].slice(11, 42) : []
-  const weightLine3 = age.value === '1' ? growthData[key].weight['25th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['25th'].slice(11, 42) : []
-  const weightLine4 = age.value === '1' ? growthData[key].weight['50th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['50th'].slice(11, 42) : []
-  const weightLine5 = age.value === '1' ? growthData[key].weight['75th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['75th'].slice(11, 42) : []
-  const weightLine6 = age.value === '1' ? growthData[key].weight['90th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['90th'].slice(11, 42) : []
-  const weightLine7 = age.value === '1' ? growthData[key].weight['97th'].slice(0, 12) : age.value === '2' ? growthData[key].weight['97th'].slice(11, 42) : []
+  const weightLine1 = age.value === '1' ? growthData2[key].weight['3rd'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['3rd'].slice(36, 218) : []
+  const weightLine2 = age.value === '1' ? growthData2[key].weight['10th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['10th'].slice(36, 218) : []
+  const weightLine3 = age.value === '1' ? growthData2[key].weight['25th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['25th'].slice(36, 218) : []
+  const weightLine4 = age.value === '1' ? growthData2[key].weight['50th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['50th'].slice(36, 218) : []
+  const weightLine5 = age.value === '1' ? growthData2[key].weight['75th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['75th'].slice(36, 218) : []
+  const weightLine6 = age.value === '1' ? growthData2[key].weight['90th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['90th'].slice(36, 218) : []
+  const weightLine7 = age.value === '1' ? growthData2[key].weight['97th'].slice(0, 37) : age.value === '2' ? growthData2[key].weight['97th'].slice(36, 218) : []
 
   const title = {
     text: age.value === '1' ? `中国0~3岁儿童（${sex.value}）身高、体重百分位曲线图` : age.value === '2' ? `中国3~18岁儿童（${sex.value}）身高、体重百分位曲线图` : '???',
@@ -175,9 +150,8 @@ const setupChartOption1 = () => {
 
   // 横坐标(各刻度之间新增3个虚拟刻度)
   const chartXaxis = computed(() => {
-    const arr = age.value === '1' ? growthData.ages.slice(0, 12) : age.value === '2' ? growthData.ages.slice(11, 42) : []
-    // return arr
-    return dealWithDataArr(arr)
+    const arr = age.value === '1' ? growthData2.ages.slice(0, 37) : age.value === '2' ? growthData2.ages.slice(36, 217) : []
+    return arr
   })
 
   const result = {
@@ -191,8 +165,16 @@ const setupChartOption1 = () => {
       data: ['身高3rd', '身高10th', '身高25th', '身高50th', '身高75th', '身高90th', '身高97th', '体重3rd', '体重10th', '体重25th', '体重50th', '体重75th', '体重90th', '体重97th']
     },
     xAxis: [
-      { type: 'category', data: chartXaxis.value, boundaryGap: false, axisLabel: { interval: 0 }, splitLine: { show: true } },
-      // { type: 'category', data: dealWithDataArr(chartXaxis.value), boundaryGap: false, axisLabel: { show: true, interval: 0 }, splitLine: { show: false } },
+      {
+        type: 'category', data: chartXaxis.value, boundaryGap: false,
+        axisLabel: {
+          formatter: formatAgeText,
+        },
+        axisTick: {
+          interval: age.value == '1' ? 0 : 1,
+        },
+        splitLine: { show: true, interval: age.value == '1' ? 0 : 1 },
+      },
     ],
     yAxis: [
       { type: 'value', name: '身高（cm）', nameTextStyle: { fontWeight: 'bold' }, axisLine: { show: true }, splitNumber: 20, splitLine: { show: true }, max: age.value === '1' ? 110 : 200 },
@@ -208,24 +190,24 @@ const setupChartOption1 = () => {
 
   // 1系列标准线
   if (viewlines1.value) {
-    seriesData.push({ name: '身高3rd', type: 'line', data: insertExtraValues(heightLine1), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高10th', type: 'line', data: insertExtraValues(heightLine2), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高25th', type: 'line', data: insertExtraValues(heightLine3), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高50th', type: 'line', data: insertExtraValues(heightLine4), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高75th', type: 'line', data: insertExtraValues(heightLine5), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高90th', type: 'line', data: insertExtraValues(heightLine6), yAxisIndex: 0, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '身高97th', type: 'line', data: insertExtraValues(heightLine7), yAxisIndex: 0, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '身高3rd', type: 'line', data: (heightLine1), yAxisIndex: 0, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize })
+    seriesData.push({ name: '身高10th', type: 'line', data: (heightLine2), yAxisIndex: 0, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize })
+    seriesData.push({ name: '身高25th', type: 'line', data: (heightLine3), yAxisIndex: 0, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize })
+    seriesData.push({ name: '身高50th', type: 'line', data: (heightLine4), yAxisIndex: 0, lineStyle: { type: 'solid', width: lineWidth, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize })
+    seriesData.push({ name: '身高75th', type: 'line', data: (heightLine5), yAxisIndex: 0, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize })
+    seriesData.push({ name: '身高90th', type: 'line', data: (heightLine6), yAxisIndex: 0, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize })
+    seriesData.push({ name: '身高97th', type: 'line', data: (heightLine7), yAxisIndex: 0, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize })
   }
 
   // 2系列标准线
   if (viewlines2.value) {
-    seriesData.push({ name: '体重3rd', type: 'line', data: insertExtraValues(weightLine1), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重10th', type: 'line', data: insertExtraValues(weightLine2), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重25th', type: 'line', data: insertExtraValues(weightLine3), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重50th', type: 'line', data: insertExtraValues(weightLine4), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重75th', type: 'line', data: insertExtraValues(weightLine5), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重90th', type: 'line', data: insertExtraValues(weightLine6), yAxisIndex: 1, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize })
-    seriesData.push({ name: '体重97th', type: 'line', data: insertExtraValues(weightLine7), yAxisIndex: 1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize })
+    seriesData.push({ name: '体重3rd', type: 'line', data: (weightLine1), yAxisIndex: 1, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize })
+    seriesData.push({ name: '体重10th', type: 'line', data: (weightLine2), yAxisIndex: 1, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize })
+    seriesData.push({ name: '体重25th', type: 'line', data: (weightLine3), yAxisIndex: 1, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize })
+    seriesData.push({ name: '体重50th', type: 'line', data: (weightLine4), yAxisIndex: 1, lineStyle: { type: 'solid', width: lineWidth, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize })
+    seriesData.push({ name: '体重75th', type: 'line', data: (weightLine5), yAxisIndex: 1, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize })
+    seriesData.push({ name: '体重90th', type: 'line', data: (weightLine6), yAxisIndex: 1, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize })
+    seriesData.push({ name: '体重97th', type: 'line', data: (weightLine7), yAxisIndex: 1, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize })
   }
 
   // 如果存在有个人数据
@@ -261,12 +243,12 @@ const setupChartOption1 = () => {
           // labelLayout: { align: 'center', dx: 100, dy: -100 },
           labelLayout: { y: 70, align: 'center', hideOverlap: true, moveOverlap: 'shiftX' },
           labelLine: { show: true, length2: 5, lineStyle: { color: '#bbb' } },
-          symbol: 'diamond', itemStyle: { color: '#555' }, symbolSize: function (data: any) { return 10 },
+          symbol: 'diamond', itemStyle: { color: dotSymbolColor }, symbolSize: function (data: any) { return dotSymbolSize },
           emphasis: { focus: 'none' },
           label: {
             show: true, minMargin: 10,
             formatter: function (param: any) {
-              return `${param.data.age}，测量身高: ${param.data.value}cm（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
+              return `${formatAgeText(param.data.age)}，测量身高: ${param.data.value}cm（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
             },
           },
         }
@@ -298,12 +280,12 @@ const setupChartOption1 = () => {
           data: _data2,
           labelLayout: { y: 100, align: 'center', hideOverlap: true, moveOverlap: 'shiftX' },
           labelLine: { show: true, length2: 5, lineStyle: { color: '#bbb' } },
-          symbol: 'diamond', itemStyle: { color: '#555' }, symbolSize: function (data: any) { return 10 },
+          symbol: 'diamond', itemStyle: { color: dotSymbolColor }, symbolSize: function (data: any) { return dotSymbolSize },
           emphasis: { focus: 'none' },
           label: {
             show: true, minMargin: 10,
             formatter: function (param: any) {
-              return `${param.data.age}，测量体重: ${param.data.value}kg（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
+              return `${formatAgeText(param.data.age)}，测量体重: ${param.data.value}kg（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
             },
           },
         }
@@ -314,21 +296,22 @@ const setupChartOption1 = () => {
   result.series = seriesData
 
   chartOption1.value = result
+  loadingChart1.value = false
 }
 
 // 整理并给chart下料
 const setupChartOption2 = () => {
   const key = sex.value === '男' ? 'male' : 'female'
 
-  const bmiLine1 = growthData[key].bmi['3rd']
-  const bmiLine2 = growthData[key].bmi['5th']
-  const bmiLine3 = growthData[key].bmi['10th']
-  const bmiLine4 = growthData[key].bmi['15th']
-  const bmiLine5 = growthData[key].bmi['50th']
-  const bmiLine6 = growthData[key].bmi['85th']
-  const bmiLine7 = growthData[key].bmi['90th']
-  const bmiLine8 = growthData[key].bmi['95th']
-  const bmiLine9 = growthData[key].bmi['97th']
+  const bmiLine1 = growthData2[key].bmi['3rd']
+  const bmiLine2 = growthData2[key].bmi['5th']
+  const bmiLine3 = growthData2[key].bmi['10th']
+  const bmiLine4 = growthData2[key].bmi['15th']
+  const bmiLine5 = growthData2[key].bmi['50th']
+  const bmiLine6 = growthData2[key].bmi['85th']
+  const bmiLine7 = growthData2[key].bmi['90th']
+  const bmiLine8 = growthData2[key].bmi['95th']
+  const bmiLine9 = growthData2[key].bmi['97th']
 
   const title = {
     text: `中国2~18岁儿童（${sex.value}）BMI曲线图`,
@@ -341,18 +324,18 @@ const setupChartOption2 = () => {
   }
 
   const seriesData: any = viewlines0.value ? [
-    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize },
-    { name: '5th', type: 'line', data: bmiLine2, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize },
-    { name: '10th', type: 'line', data: bmiLine3, lineStyle: { type: 'dashed', width: 1, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize: pointSize },
-    { name: '15th', type: 'line', data: bmiLine4, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize },
-    { name: '50th', type: 'line', data: bmiLine5, lineStyle: { type: 'solid', width: 1, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize: pointSize },
-    { name: '85th', type: 'line', data: bmiLine6, lineStyle: { type: 'dashed', width: 1, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize: pointSize },
-    { name: '90th', type: 'line', data: bmiLine7, lineStyle: { type: 'dashed', width: 1, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize: pointSize },
-    { name: '95th', type: 'line', data: bmiLine8, lineStyle: { type: 'dashed', width: 1, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize: pointSize },
-    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'solid', width: 1, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize: pointSize }
+    { name: '3rd', type: 'line', data: bmiLine1, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize },
+    { name: '5th', type: 'line', data: bmiLine2, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize },
+    { name: '10th', type: 'line', data: bmiLine3, lineStyle: { type: 'dashed', width: lineWidth, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize },
+    { name: '15th', type: 'line', data: bmiLine4, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize },
+    { name: '50th', type: 'line', data: bmiLine5, lineStyle: { type: 'solid', width: lineWidth, color: '#483D8B' }, itemStyle: { color: '#483D8B' }, symbolSize },
+    { name: '85th', type: 'line', data: bmiLine6, lineStyle: { type: 'dashed', width: lineWidth, color: '#32CD32' }, itemStyle: { color: '#32CD32' }, symbolSize },
+    { name: '90th', type: 'line', data: bmiLine7, lineStyle: { type: 'dashed', width: lineWidth, color: '#FFD700' }, itemStyle: { color: '#FFD700' }, symbolSize },
+    { name: '95th', type: 'line', data: bmiLine8, lineStyle: { type: 'dashed', width: lineWidth, color: '#FF8C00' }, itemStyle: { color: '#FF8C00' }, symbolSize },
+    { name: '97th', type: 'line', data: bmiLine9, lineStyle: { type: 'solid', width: lineWidth, color: '#FF0000' }, itemStyle: { color: '#FF0000' }, symbolSize }
   ] : []
 
-  const xAxisData = growthData.ages2
+  const xAxisData = growthData2.ages2
 
   const result = {
     title,
@@ -364,7 +347,15 @@ const setupChartOption2 = () => {
       bottom: 30,
       data: ['3rd', '5th', '10th', '15th', '50th', '85th', '90th', '95th', '97th']
     },
-    xAxis: { type: 'category', data: xAxisData, boundaryGap: false, axisLabel: { interval: 0 }, splitLine: { show: true } },
+    xAxis: {
+      type: 'category', data: xAxisData, boundaryGap: false,
+      axisLabel: {
+        formatter: formatAgeText,
+        interval: 11,
+      },
+      axisTick: { interval: 1 },
+      splitLine: { show: true, interval: 1 },
+    },
     yAxis: { type: 'value', name: 'BMI', nameTextStyle: { fontWeight: 'bold' }, splitNumber: 20, axisLine: { show: true }, min: 8, max: 33 },
     series: [],
     graphic: {
@@ -396,12 +387,12 @@ const setupChartOption2 = () => {
         data: _data1,
         labelLayout: { y: 70, align: 'center', hideOverlap: true, moveOverlap: 'shiftX' },
         labelLine: { show: true, length2: 5, lineStyle: { color: '#bbb' } },
-        symbol: 'diamond', itemStyle: { color: '#555' }, xsymbolSize: function (data: any) { return 10 },
+        symbol: 'diamond', itemStyle: { color: dotSymbolColor }, symbolSize: function (data: any) { return dotSymbolSize },
         emphasis: { focus: 'none' },
         label: {
           show: true, minMargin: 10,
           formatter: function (param: any) {
-            return `${param.data.age}，BMI: ${param.data.value}（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
+            return `${formatAgeText(param.data.age)}，BMI: ${param.data.value}（${dayjs(param.data.date).format('YYYY-MM-DD')}）`;
           },
         },
       }
@@ -411,6 +402,7 @@ const setupChartOption2 = () => {
   result.series = seriesData
 
   chartOption2.value = result
+  loadingChart2.value = false
 }
 
 // 准备录入数据
@@ -442,12 +434,19 @@ const onSaveDataLine = async (dataline: any) => {
 }
 
 const onChangeSex = (v: string) => {
-  setupChartOption1()
-  setupChartOption2()
+  loadingChart1.value = true
+  loadingChart2.value = true
+  setTimeout(() => {
+    setupChartOption1()
+    setupChartOption2()
+  }, timeasync)
 }
 
 const onChangeAge = (v: string) => {
-  setupChartOption1()
+  loadingChart1.value = true
+  setTimeout(() => {
+    setupChartOption1()
+  }, timeasync)
 }
 
 const addFakeData = () => {
@@ -460,7 +459,7 @@ const addFakeData = () => {
       id: i,
       name: `测试姓名`,
       sex: '男',
-      age: growthData.ages[i + 8],
+      age: growthData2.ages[i + 30],
       time: Date.now(),
       number: `1234567`,
       height: h,
@@ -473,7 +472,6 @@ const addFakeData = () => {
 
 const setupData = (arr: any[]) => {
   mainData.value = arr
-  console.log(arr)
   const target = arr[0]
   // 自动代入性别
   if (target.sex === '男') {
@@ -482,7 +480,7 @@ const setupData = (arr: any[]) => {
     sex.value = '女'
   }
   // 自动代入年龄段
-  if (target.age.includes('岁') && !target.age.includes('2')) {
+  if (target.age > 36) {
     age.value = '2'
   } else {
     age.value = '1'
@@ -491,7 +489,7 @@ const setupData = (arr: any[]) => {
   setTimeout(() => {
     setupChartOption1()
     setupChartOption2()
-  }, 0)
+  }, 10)
 }
 
 onMounted(() => {
@@ -500,10 +498,12 @@ onMounted(() => {
     addFakeData()
   }
 
+  loadingChart1.value = true
+  loadingChart2.value = true
   setTimeout(() => {
     setupChartOption1()
     setupChartOption2()
-  }, 300)
+  }, timeasync)
 })
 
 defineExpose({
